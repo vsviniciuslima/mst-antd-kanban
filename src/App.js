@@ -26,6 +26,14 @@ import {
   PlusOutlined
 } from '@ant-design/icons'
 
+import {
+  TagConfidencialidade,
+  TagNaoConcluido,
+  TagTrabalhista,
+  TagConcluido,
+  TagBancaria
+} from '../src/components/Tags'
+
 const { Panel } = Collapse
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
@@ -48,7 +56,7 @@ const tarefa2 = Task.create({
   responsavel: 'Fabio Nagao',
   dataDeCriacao: '16/07/2020',
   dataPrevistaDeConclusao: '-',
-  tags: ['Trabalhista ', 'Não concluído']
+  tags: ['Trabalhista', 'Não concluído']
 })
 const tarefa3 = Task.create({
   key: '3',
@@ -88,141 +96,102 @@ store.addTask(tarefa3)
 store.addTask(tarefa4)
 store.addTask(tarefa5)
 
-const filterText = ['Angelo Caldeira', 'Fabio Nagao']
-const filterValue = ['Angelo Caldeira', 'Fabio Nagao']
-
-function returnOptions () {
-  const responsaveis = store.getResponsaveis().toString
-}
-
-function generateFiltersFromDataSet (dataSet) {
-
-}
-
-const filters = [
-  {
-    /* rator */text: 'Fabio Nagao',
-    /* rand */value: 'Fabio Nagao'
-  }
-]
-
-function renderText (text) {
-  return (
-    <p>{text}</p>
-  )
-}
-
-function renderTags (tags) {
-
-}
-
-const columns = [
-  {
-    title: <b>Tarefa</b>,
-    dataIndex: 'tarefa',
-    key: 'tarefa',
-    sorter: (a, b) => a.tarefa.length - b.tarefa.length,
-    sortDirections: ['descend', 'ascend'],
-    render: text => renderText(text)
-  },
-  {
-    title: <b>Documento</b>,
-    dataIndex: 'documento',
-    key: 'documento',
-    sorter: (a, b) => a.documento.length - b.documento.length,
-    sortDirections: ['descend', 'ascend'],
-    render: documento => (
-      <span>
-        <a>{documento}</a>
-      </span>
-    )
-  },
-  {
-    title: <b>Status da tarefa</b>,
-    dataIndex: 'status',
-    key: 'status',
-    sorter: (a, b) => a.status.length - b.status.length,
-    sortDirections: ['descend', 'ascend']
-  },
-  {
-    title: <b>Responsável</b>,
-    dataIndex: 'responsavel',
-    key: 'responsavel',
-    sorter: (a, b) => a.responsavel.length - b.responsavel.length,
-    sortDirections: ['descend', 'ascend'],
-    filters,
-    filterMultiple: false,
-    onFilter: (value, record) => record.responsavel.indexOf(value) === 0,
-    render: responsavel => (
-      <Space size='middle'>
-        <UserOutlined />
-        {responsavel}
-      </Space>
-    )
-  },
-  {
-    title: <b>Criada em</b>,
-    dataIndex: 'dataDeCriacao',
-    key: 'dataDeCriacao',
-    sorter: (a, b) => a.dataDeCriacao.length - b.dataDeCriacao.length,
-    sortDirections: ['descend', 'ascend']
-  },
-  {
-    title: <b>Prevista para</b>,
-    dataIndex: 'dataPrevistaDeConclusao',
-    key: 'dataPrevistaDeConclusao',
-    sorter: (a, b) => a.dataPrevistaDeConclusao.length - b.dataPrevistaDeConclusao.length,
-    sortDirections: ['descend', 'ascend']
-  },
-  {
-    title: <b>Tags</b>,
-    key: 'tags',
-    dataIndex: 'tags',
-    render: tags => (
+function App () {
+  function renderTags (tags) {
+    return (
       <>
         {tags.map(tag => {
-          let color
-
           switch (tag) {
             case 'Confidencialidade':
-              color = 'purple'
-              break
+              return <TagConfidencialidade />
             case 'Não concluído':
-              color = 'red'
-              break
+              return <TagNaoConcluido />
             case 'Trabalhista':
-              color = 'blue'
-              break
+              return <TagTrabalhista />
             case 'Concluído':
-              color = 'green'
-              break
+              return <TagConcluido />
             case 'Bancária':
-              color = 'gold'
-              break
+              return <TagBancaria />
             default:
-              color = 'blue'
+              return <TagConfidencialidade />
           }
-          return (
-            <Tag color={color} key={tag}>
-              {tag}
-            </Tag>
-          )
         })}
       </>
     )
-  },
-  {
-    title: <b>Opções</b>,
-    key: 'opcoes',
-    render: text => (
-      <Space size='middle'>
-        <a>Finalizar</a>
-      </Space>
-    )
   }
-]
 
-function App () {
+  const columns = [
+    {
+      title: <b>Tarefa</b>,
+      dataIndex: 'tarefa',
+      key: 'tarefa',
+      sorter: (a, b) => a.tarefa.length - b.tarefa.length,
+      render: text => (
+        <p>{text}</p>
+      )
+    },
+    {
+      title: <b>Documento</b>,
+      dataIndex: 'documento',
+      key: 'documento',
+      filters: store.generateFiltersFromDataSet('documento'),
+      sorter: (a, b) => a.documento.length - b.documento.length,
+      render: documento => (
+        <span>
+          <a>{documento}</a>
+        </span>
+      )
+    },
+    {
+      title: <b>Status da tarefa</b>,
+      dataIndex: 'status',
+      key: 'status',
+      sorter: (a, b) => a.status.length - b.status.length
+    },
+    {
+      title: <b>Responsável</b>,
+      dataIndex: 'responsavel',
+      key: 'responsavel',
+      sorter: (a, b) => a.responsavel.length - b.responsavel.length,
+      filters: store.generateFiltersFromDataSet('responsavel'),
+      filterMultiple: false,
+      onFilter: (value, record) => record.responsavel.indexOf(value) === 0,
+      render: responsavel => (
+        <Space size='middle'>
+          <UserOutlined />
+          {responsavel}
+        </Space>
+      )
+    },
+    {
+      title: <b>Criada em</b>,
+      dataIndex: 'dataDeCriacao',
+      key: 'dataDeCriacao',
+      sorter: (a, b) => a.dataDeCriacao.length - b.dataDeCriacao.length
+    },
+    {
+      title: <b>Prevista para</b>,
+      dataIndex: 'dataPrevistaDeConclusao',
+      key: 'dataPrevistaDeConclusao',
+      sorter: (a, b) => a.dataPrevistaDeConclusao.length - b.dataPrevistaDeConclusao.length
+    },
+    {
+      title: <b>Tags</b>,
+      key: 'tags',
+      dataIndex: 'tags',
+      render: tags => renderTags(tags)
+    },
+    {
+      title: <b>Opções</b>,
+      key: 'opcoes',
+      render: text => (
+        <Space size='middle'>
+          <a>Finalizar</a>
+        </Space>
+      )
+    }
+  ]
+
   return (
     <Layout style={{ height: '100vh' }}>
       <Header style={{ backgroundColor: 'transparent', color: 'black', textAlign: 'left' }}>
@@ -261,7 +230,7 @@ function App () {
               <Panel header='Finalizadas' key='3'>
                 <Table
                   columns={columns}
-                  dataSource={store.getFilteredTasks('Finalizadas')}
+                  dataSource={store.getFilteredTasks2('ALL')}
                   pagination={false}
                 />
               </Panel>
