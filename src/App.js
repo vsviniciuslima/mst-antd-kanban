@@ -1,29 +1,25 @@
-import { useRef } from 'react'
 import {
   Layout,
   Button,
   Row,
   Col,
   Typography,
-  Form,
   Input,
   Table,
-  Tag,
   Space,
-  Divider,
   Collapse
-
 } from 'antd'
 
 import TaskStore from './models/TaskStore'
 import Task from './models/Task'
-import { getSnapshot } from 'mobx-state-tree'
 
 import {
   UserOutlined,
   LockOutlined,
   SearchOutlined,
-  PlusOutlined
+  PlusOutlined,
+  RobotOutlined,
+  CheckOutlined
 } from '@ant-design/icons'
 
 import {
@@ -37,6 +33,8 @@ import {
 const { Panel } = Collapse
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
+
+const store = TaskStore.create()
 
 const tarefa = Task.create({
   key: '1',
@@ -83,41 +81,64 @@ const tarefa5 = Task.create({
   tarefa: 'Concluir construção',
   documento: 'Contestação Revisional Ban...',
   status: 'Finalizada',
-  responsavel: 'Laís Gerólamo',
+  responsavel: 'Robô Looplex',
+  dataDeCriacao: '16/07/2020',
+  dataPrevistaDeConclusao: '-',
+  tags: ['Bancária', 'Concluído']
+})
+const tarefa6 = Task.create({
+  key: '6',
+  tarefa: 'Concluir construção',
+  documento: 'Contestação Revisional Ban...',
+  status: 'Aguardando execução',
+  responsavel: 'Robô Looplex',
   dataDeCriacao: '16/07/2020',
   dataPrevistaDeConclusao: '-',
   tags: ['Bancária', 'Concluído']
 })
 
-const store = TaskStore.create()
 store.addTask(tarefa)
 store.addTask(tarefa2)
 store.addTask(tarefa3)
 store.addTask(tarefa4)
 store.addTask(tarefa5)
+store.addTask(tarefa6)
 
 function App () {
   function renderTags (tags) {
     return (
       <>
         {tags.map(tag => {
-          switch (tag) {
-            case 'Confidencialidade':
-              return <TagConfidencialidade />
-            case 'Não concluído':
-              return <TagNaoConcluido />
-            case 'Trabalhista':
-              return <TagTrabalhista />
-            case 'Concluído':
-              return <TagConcluido />
-            case 'Bancária':
-              return <TagBancaria />
-            default:
-              return <TagConfidencialidade />
+          const tags = {
+            Confidencialidade: <TagConfidencialidade />,
+            'Não concluído': <TagNaoConcluido />,
+            Trabalhista: <TagTrabalhista />,
+            Concluído: <TagConcluido />,
+            Bancária: <TagBancaria />
           }
+          return tags[tag]
         })}
       </>
     )
+  }
+
+  function renderResponsible (responsavel) {
+    return (
+      <> {responsavel === 'Robô Looplex'
+        ? <><RobotOutlined /> {responsavel} </>
+        : <> <UserOutlined /> {responsavel} </>}
+      </>
+    )
+  }
+
+  function renderStatus (status) {
+    const states = {
+      'Em execução': <> <LockOutlined /> {status} </>,
+      Finalizada: <> <CheckOutlined /> {status} </>,
+      'Aguardando execução': <> {status} </>,
+      'Em breve': <> {status} </>
+    }
+    return states[status]
   }
 
   const columns = [
@@ -146,7 +167,8 @@ function App () {
       title: <b>Status da tarefa</b>,
       dataIndex: 'status',
       key: 'status',
-      sorter: (a, b) => a.status.length - b.status.length
+      sorter: (a, b) => a.status.length - b.status.length,
+      render: status => renderStatus(status)
     },
     {
       title: <b>Responsável</b>,
@@ -156,12 +178,13 @@ function App () {
       filters: store.generateFiltersFromDataSet('responsavel'),
       filterMultiple: false,
       onFilter: (value, record) => record.responsavel.indexOf(value) === 0,
-      render: responsavel => (
+      /*       render: responsavel => (
         <Space size='middle'>
           <UserOutlined />
           {responsavel}
         </Space>
-      )
+      ) */
+      render: responsavel => renderResponsible(responsavel)
     },
     {
       title: <b>Criada em</b>,
@@ -199,7 +222,7 @@ function App () {
       </Header>
       <Content>
         <Row justify='center'>
-          <Col span={23}>
+          <Col span={24}>
 
             <Row gutter={16} justify='space-around'>
               <Col span={19}>
@@ -216,21 +239,21 @@ function App () {
               <Panel header='Em execução e aguardando execução' key='1'>
                 <Table
                   columns={columns}
-                  dataSource={store.getFilteredTasks('Em execução / Aguardando execução')}
+                  dataSource={store.getFilteredTasks('EXECUTING')}
                   pagination={false}
                 />
               </Panel>
               <Panel header='Em breve' key='2'>
                 <Table
                   columns={columns}
-                  dataSource={store.getFilteredTasks('Em breve')}
+                  dataSource={store.getFilteredTasks('SOON')}
                   pagination={false}
                 />
               </Panel>
               <Panel header='Finalizadas' key='3'>
                 <Table
                   columns={columns}
-                  dataSource={store.getFilteredTasks2('ALL')}
+                  dataSource={store.getFilteredTasks('COMPLETED')}
                   pagination={false}
                 />
               </Panel>

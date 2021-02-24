@@ -1,4 +1,4 @@
-import { types } from 'mobx-state-tree'
+import { types, flow } from 'mobx-state-tree'
 
 import Task from './Task.js'
 
@@ -6,22 +6,23 @@ function slugify (x) {
   return encodeURIComponent(x.toLowerCase().replace(/\s+/gim, '-'))
 }
 
+/* function (pagination, filters, sorter, extra:
+  {​​ currentDataSource: [], action: paginate | sort | filter }
+​​)
+*/
+
 const TaskStore = types
   .model({
     tasks: types.array(Task)
   })
   .views(self => ({
     getFilteredTasks (filter) {
-      switch (filter) {
-        case ('Em execução / Aguardando execução') :
-          return self.tasks.filter(task => task.status === 'Aguardando execução' || task.status === 'Em execução')
-        case 'Em breve':
-          return self.tasks.filter(task => task.status === 'Em breve')
-        case 'Finalizadas':
-          return self.tasks.filter(task => task.status === 'Finalizada')
-/*         default:
-          return self.tasks.filter(task => task.status === 'Aguardando execução' || task.status === 'Em execução') */
+      const filters = {
+        EXECUTING: self.tasks.filter(task => task.status === 'Aguardando execução' || task.status === 'Em execução'),
+        SOON: self.tasks.filter(task => task.status === 'Em breve'),
+        COMPLETED: self.tasks.filter(task => task.status === 'Finalizada')
       }
+      return filters[filter]
     },
     generateFiltersFromDataSet (key) {
       const notFilteredEntriesArray = []
